@@ -7,6 +7,7 @@ message-content scrubbing happens at the tools boundary, not here.
 from __future__ import annotations
 
 import asyncio
+import time
 
 import httpx
 
@@ -18,6 +19,9 @@ USER_AGENT = (
 MAX_RETRIES = 3
 # Discord's search endpoint returns 202 while results are computed asynchronously.
 SEARCH_RETRY_INTERVAL = 2.0  # seconds
+# Per-process GET cache: 60s per Ichnos channel-matrix precedent.
+DEFAULT_CACHE_TTL = 60.0  # seconds
+CACHE_MAX_ENTRIES = 256
 
 
 class AuthRequired(Exception):
@@ -35,10 +39,12 @@ class NotFound(Exception):
 class DiscordClient:
     """Async Discord REST client operating under a captured user token."""
 
-    def __init__(self, token: str, base_url: str = BASE_URL):
+    def __init__(self, token: str, base_url: str = BASE_URL, cache_ttl: float = DEFAULT_CACHE_TTL):
         self._token = token
         self._base_url = base_url
         self._client: httpx.AsyncClient | None = None
+        self._cache: dict[tuple, tuple[float, object]] = {}
+        self._cache_ttl = cache_ttl
 
     async def __aenter__(self) -> DiscordClient:
         self._client = httpx.AsyncClient(
@@ -57,8 +63,20 @@ class DiscordClient:
             await self._client.aclose()
             self._client = None
 
+    def _cache_key(self, method: str, path: str, params: dict | None) -> tuple:
+        return (method, path, tuple(sorted((params or {}).items())))
+
     async def _request(self, method: str, path: str, params: dict | None = None) -> object:
         assert self._client is not None, "Use 'async with DiscordClient(...)'"
+        key: tuple | None = None
+        if method == "GET":
+            key = self._cache_key(method, path, params)
+            entry = self._cache.get(key)
+            if entry and time.monotonic() - entry[0] < self._cache_ttl:
+                return entry[1]
+            if entry is None and len(self._cache) >= CACHE_MAX_ENTRIES:
+                oldest = min(self._cache, key=lambda k: self._cache[k][0])
+                del self._cache[oldest]
         for _attempt in range(MAX_RETRIES):
             response = await self._client.request(method, path, params=params)
             if response.status_code == 429:
@@ -76,7 +94,10 @@ class DiscordClient:
             if response.status_code == 404:
                 raise NotFound(f"Not found: {path}")
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            if key is not None:
+                self._cache[key] = (time.monotonic(), data)
+            return data
         raise RuntimeError(
             f"Rate limited or search incomplete after {MAX_RETRIES} retries on {path}"
         )

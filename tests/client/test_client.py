@@ -1,3 +1,5 @@
+import asyncio
+
 import httpx
 import pytest
 import respx
@@ -10,6 +12,61 @@ TOKEN = "test-user-token"
 
 def _make_client() -> DiscordClient:
     return DiscordClient(TOKEN)
+
+
+def _make_cached_client(ttl: float = 60.0) -> DiscordClient:
+    return DiscordClient(TOKEN, cache_ttl=ttl)
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_cache_second_call_hits_no_http():
+    route = respx.get(f"{BASE}/users/@me/guilds").mock(
+        return_value=httpx.Response(200, json=[{"id": "1", "name": "g"}])
+    )
+    async with _make_cached_client() as client:
+        first = await client.get_guilds()
+        second = await client.get_guilds()
+    assert first == second
+    assert route.call_count == 1
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_cache_expires_after_ttl():
+    route = respx.get(f"{BASE}/users/@me/guilds").mock(
+        return_value=httpx.Response(200, json=[{"id": "1", "name": "g"}])
+    )
+    async with _make_cached_client(ttl=0.05) as client:
+        await client.get_guilds()
+        await asyncio.sleep(0.06)
+        await client.get_guilds()
+    assert route.call_count == 2
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_cache_key_distinguishes_params():
+    route = respx.get(f"{BASE}/channels/123/messages").mock(
+        return_value=httpx.Response(200, json=[])
+    )
+    async with _make_cached_client() as client:
+        await client.get_channel_messages("123", limit=10)
+        await client.get_channel_messages("123", limit=25)
+    assert route.call_count == 2
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_cache_does_not_store_429():
+    route = respx.get(f"{BASE}/users/@me/guilds").mock(
+        return_value=httpx.Response(429, headers={"Retry-After": "0"})
+    )
+    async with _make_cached_client() as client:
+        with pytest.raises(RuntimeError):
+            await client.get_guilds()
+    assert client._cache == {}
+    assert route.call_count == 3
 
 
 @respx.mock
