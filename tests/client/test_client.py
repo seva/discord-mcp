@@ -65,6 +65,37 @@ async def test_get_dm_channels():
 
 @respx.mock
 @pytest.mark.asyncio
+async def test_get_archived_threads_public_and_private():
+    pub = {"has_more": False, "members": [], "threads": [{"id": "t1", "name": "public one"}]}
+    priv = {"has_more": False, "members": [], "threads": [{"id": "t2", "name": "private one"}]}
+    respx.get(f"{BASE}/channels/123/threads/archived/public").mock(
+        return_value=httpx.Response(200, json=pub)
+    )
+    respx.get(f"{BASE}/channels/123/threads/archived/private").mock(
+        return_value=httpx.Response(200, json=priv)
+    )
+    async with _make_client() as client:
+        result = await client.get_archived_threads("123")
+    assert [t["id"] for t in result] == ["t1", "t2"]
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_get_archived_threads_private_denied_returns_public_only():
+    pub = {"has_more": False, "members": [], "threads": [{"id": "t1", "name": "public one"}]}
+    respx.get(f"{BASE}/channels/123/threads/archived/public").mock(
+        return_value=httpx.Response(200, json=pub)
+    )
+    respx.get(f"{BASE}/channels/123/threads/archived/private").mock(
+        return_value=httpx.Response(403, json={"message": "Missing Access", "code": 50001})
+    )
+    async with _make_client() as client:
+        result = await client.get_archived_threads("123")
+    assert [t["id"] for t in result] == ["t1"]
+
+
+@respx.mock
+@pytest.mark.asyncio
 async def test_get_guilds():
     respx.get(f"{BASE}/users/@me/guilds").mock(
         return_value=httpx.Response(

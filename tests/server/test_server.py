@@ -50,9 +50,10 @@ def test_tool_registration():
     expected = {
         "discord_status",
         "discord_channels",
+        "discord_dms",
         "discord_messages",
         "discord_search",
-        "discord_dms",
+        "discord_threads",
     }
     assert expected == set(tools.keys())
 

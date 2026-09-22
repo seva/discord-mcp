@@ -9,6 +9,7 @@ from discord_mcp.tools import dms as dms_tool
 from discord_mcp.tools import messages as messages_tool
 from discord_mcp.tools import search as search_tool
 from discord_mcp.tools import status as status_tool
+from discord_mcp.tools import threads as threads_tool
 
 mcp = FastMCP("discord")
 
@@ -35,6 +36,12 @@ async def discord_messages(channel_id: str, limit: int = 10) -> str:
 async def discord_dms() -> str:
     """List the user's DM and group-DM channels with derived labels."""
     return await dms_tool.discord_dms()
+
+
+@mcp.tool()
+async def discord_threads(channel_id: str) -> str:
+    """List a channel's archived threads (public always, private best-effort). Thread IDs work with discord_messages."""
+    return await threads_tool.discord_threads(channel_id)
 
 
 @mcp.tool()

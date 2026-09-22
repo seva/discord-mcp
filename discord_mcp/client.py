@@ -98,6 +98,23 @@ class DiscordClient:
             "GET", f"/channels/{channel_id}/messages", params={"limit": limit}
         )  # type: ignore[return-value]
 
+    async def get_archived_threads(self, channel_id: str) -> list[dict]:
+        """Archived threads of a channel: public always; private best-effort.
+
+        Private archived listing is permission-gated (MANAGE_THREADS / thread
+        membership); AccessDenied there degrades to public-only, not an error.
+        """
+        threads: list[dict] = []
+        for visibility in ("public", "private"):
+            try:
+                data = await self._request(
+                    "GET", f"/channels/{channel_id}/threads/archived/{visibility}"
+                )
+                threads.extend(data["threads"])  # type: ignore[index]
+            except AccessDenied:
+                continue
+        return threads
+
     async def search_guild_messages(
         self,
         guild_id: str,

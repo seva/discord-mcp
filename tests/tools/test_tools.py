@@ -158,6 +158,52 @@ async def test_dms_derives_labels_from_recipients(auth):
     assert all("id" in entry and "type" in entry and "label" in entry for entry in result)
 
 
+ARCHIVED_PUBLIC = {
+    "has_more": False,
+    "members": [],
+    "threads": [
+        {
+            "id": "1288145052110946468",
+            "type": 10,
+            "name": "Exciting News",
+            "parent_id": "1092243196798582928",
+            "guild_id": "1092243196446249134",
+            "member_count": 50,
+            "message_count": 12,
+            "thread_metadata": {
+                "archived": True,
+                "archive_timestamp": "2024-10-24T19:15:09.980000+00:00",
+                "locked": False,
+            },
+        }
+    ],
+}
+ARCHIVED_PRIVATE = {"has_more": False, "members": [], "threads": []}
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_threads_returns_archived_thread_entries(auth):
+    respx.get(f"{BASE}/channels/123/threads/archived/public").mock(
+        return_value=httpx.Response(200, json=ARCHIVED_PUBLIC)
+    )
+    respx.get(f"{BASE}/channels/123/threads/archived/private").mock(
+        return_value=httpx.Response(200, json=ARCHIVED_PRIVATE)
+    )
+
+    from discord_mcp.tools.threads import discord_threads
+
+    result = json.loads(await discord_threads("123"))
+    assert len(result) == 1
+    entry = result[0]
+    assert entry["id"] == "1288145052110946468"
+    assert entry["name"] == "Exciting News"
+    assert entry["parent_id"] == "1092243196798582928"
+    assert entry["archived_at"] == "2024-10-24T19:15:09.980000+00:00"
+    assert entry["locked"] is False
+    assert entry["message_count"] == 12
+
+
 def test_scrub_messages_reaches_embed_free_text():
     from discord_mcp.tools import scrub_messages
 

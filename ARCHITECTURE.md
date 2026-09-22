@@ -68,6 +68,7 @@ FastMCP server exposing Discord context to MCP clients via Playwright web authen
     - `get_current_user() -> dict`: `GET /users/@me`
     - `get_guilds() -> list[dict]`: `GET /users/@me/guilds`
     - `get_dm_channels() -> list[dict]`: `GET /users/@me/channels` (DM and group-DM channels; endpoints.md 2.6)
+    - `get_archived_threads(channel_id: str) -> list[dict]`: `GET /channels/{id}/threads/archived/{public,private}` — public always; private permission-gated (AccessDenied degrades to public-only, not an error; endpoints.md 2.7)
     - `get_guild_channels(guild_id: str) -> list[dict]`: `GET /guilds/{guild_id}/channels`
     - `get_channel_messages(channel_id: str, limit: int = 10) -> list[dict]`: `GET /channels/{channel_id}/messages?limit={limit}`
     - `search_guild_messages(guild_id: str, query: str, channel_id: str | None = None, limit: int = 10) -> list[dict]`: `GET /guilds/{guild_id}/messages/search?content={query}`
@@ -75,10 +76,11 @@ FastMCP server exposing Discord context to MCP clients via Playwright web authen
   - Error types: `AuthRequired` (401 — token invalid/expired, distinct from the store's `AuthRequired`), `AccessDenied` (403), `NotFound` (404), `RuntimeError` (rate-limit retries exhausted).
 
 ### 2.4 FastMCP Server & Tools (`discord_mcp.server`, `discord_mcp.tools`)
-- Server exposes 5 tools:
+- Server exposes 6 tools:
   - `discord_status()`: Authenticated user handle, user ID, guild count.
   - `discord_channels(guild_id: str | None = None)`: Accessible guilds and channel hierarchy.
   - `discord_dms()`: DM and group-DM channels with derived labels (recipients for type-1, `name` for type-3); channel IDs usable by `discord_messages`.
+  - `discord_threads(channel_id: str)`: A channel's archived threads (public always, private best-effort); thread IDs usable by `discord_messages`. Active-thread listing is bot-only (endpoints.md 2.7).
   - `discord_messages(channel_id: str, limit: int = 10)`: Recent channel messages (scrubbed).
   - `discord_search(query: str, guild_id: str | None = None, channel_id: str | None = None, limit: int = 10)`: Guild message search results (scrubbed).
 
