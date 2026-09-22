@@ -28,4 +28,4 @@ FastMCP server exposing Discord context (guilds, channels, DMs, threads, message
 - **CLI Commands**:
   - `python -m discord_mcp auth`: Interactive Playwright Chromium login, capturing user token into DPAPI.
   - `python -m discord_mcp status`: Test connectivity and print authenticated user details.
-  - `python -m discord_mcp serve`: Launch FastMCP server over stdio.
+  - `python -m discord_mcp serve [--transport {stdio,http}] [--port N]`: Launch FastMCP server (stdio default; `--transport http` serves streamable-HTTP at `http://127.0.0.1:{port}/mcp`, localhost-bound by default).

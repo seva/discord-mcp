@@ -90,7 +90,8 @@ FastMCP server exposing Discord context to MCP clients via Playwright web authen
 - Commands:
   - `python -m discord_mcp auth`: Launches browser login and DPAPI storage.
   - `python -m discord_mcp status`: Verifies connectivity and prints authenticated user.
-  - `python -m discord_mcp serve`: Runs FastMCP server over stdio.
+  - `python -m discord_mcp serve [--transport {stdio,http}] [--port N]`: Runs FastMCP; stdio default, `--transport http` serves streamable-HTTP at `http://127.0.0.1:{port}/mcp` (localhost-bound by default — remote exposure is an operator decision, never a default; terminal bound).
+- **Server factory (`build_mcp(host, port)`)**: constructs a FastMCP instance with all six tools registered; module-level `mcp = build_mcp()` is the stdio instance. HTTP mode builds a fresh instance bound to the requested port.
 
 ---
 

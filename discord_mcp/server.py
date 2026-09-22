@@ -11,51 +11,57 @@ from discord_mcp.tools import search as search_tool
 from discord_mcp.tools import status as status_tool
 from discord_mcp.tools import threads as threads_tool
 
-mcp = FastMCP("discord")
+
+def build_mcp(host: str = "127.0.0.1", port: int = 8000) -> FastMCP:
+    """Build a configured FastMCP instance with all six tools registered.
+
+    HTTP transport binds 127.0.0.1 by default — remote exposure is an
+    operator decision, never a default (terminal bound).
+    """
+    instance = FastMCP("discord", host=host, port=port)
+
+    @instance.tool()
+    async def discord_status() -> str:
+        """Return the authenticated Discord user and count of accessible guilds."""
+        return await status_tool.discord_status()
+
+    @instance.tool()
+    async def discord_channels(guild_id: str | None = None) -> str:
+        """List accessible guilds, or the channels of one guild when guild_id is given."""
+        return await channels_tool.discord_channels(guild_id)
+
+    @instance.tool()
+    async def discord_messages(channel_id: str, limit: int = 10) -> str:
+        """Fetch recent messages from a channel (secret-scrubbed)."""
+        return await messages_tool.discord_messages(channel_id, limit)
+
+    @instance.tool()
+    async def discord_dms() -> str:
+        """List the user's DM and group-DM channels with derived labels."""
+        return await dms_tool.discord_dms()
+
+    @instance.tool()
+    async def discord_threads(channel_id: str) -> str:
+        """List a channel's archived threads (public always, private best-effort). Thread IDs work with discord_messages."""
+        return await threads_tool.discord_threads(channel_id)
+
+    @instance.tool()
+    async def discord_search(
+        query: str,
+        guild_id: str | None = None,
+        channel_id: str | None = None,
+        limit: int = 10,
+    ) -> str:
+        """Search message content in a guild (secret-scrubbed). Requires guild_id."""
+        return await search_tool.discord_search(query, guild_id, channel_id, limit)
+
+    return instance
 
 
-@mcp.tool()
-async def discord_status() -> str:
-    """Return the authenticated Discord user and count of accessible guilds."""
-    return await status_tool.discord_status()
+mcp = build_mcp()
 
 
-@mcp.tool()
-async def discord_channels(guild_id: str | None = None) -> str:
-    """List accessible guilds, or the channels of one guild when guild_id is given."""
-    return await channels_tool.discord_channels(guild_id)
-
-
-@mcp.tool()
-async def discord_messages(channel_id: str, limit: int = 10) -> str:
-    """Fetch recent messages from a channel (secret-scrubbed)."""
-    return await messages_tool.discord_messages(channel_id, limit)
-
-
-@mcp.tool()
-async def discord_dms() -> str:
-    """List the user's DM and group-DM channels with derived labels."""
-    return await dms_tool.discord_dms()
-
-
-@mcp.tool()
-async def discord_threads(channel_id: str) -> str:
-    """List a channel's archived threads (public always, private best-effort). Thread IDs work with discord_messages."""
-    return await threads_tool.discord_threads(channel_id)
-
-
-@mcp.tool()
-async def discord_search(
-    query: str,
-    guild_id: str | None = None,
-    channel_id: str | None = None,
-    limit: int = 10,
-) -> str:
-    """Search message content in a guild (secret-scrubbed). Requires guild_id."""
-    return await search_tool.discord_search(query, guild_id, channel_id, limit)
-
-
-def run():
+def run(transport: str = "stdio", port: int | None = None):
     try:
         auth = store.load()
     except AuthRequired:
@@ -66,4 +72,7 @@ def run():
         print("Auth expired. Run: python -m discord_mcp auth", file=sys.stderr)
         sys.exit(1)
 
+    if transport == "http":
+        build_mcp(port=port or 8000).run("streamable-http")
+        return
     mcp.run(transport="stdio")

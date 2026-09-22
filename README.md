@@ -78,6 +78,13 @@ Add to your client configuration:
 }
 ```
 
+### HTTP transport (for non-local consumers)
+By default the server speaks stdio (one local MCP client). For consumers that cannot spawn a subprocess (daemons, remote surfaces), serve streamable-HTTP:
+```bash
+python -m discord_mcp serve --transport http --port 8000
+```
+This binds `127.0.0.1:8000/mcp` — localhost only. Remote reach is the operator's decision (e.g., a Tailscale funnel); it is never exposed by default. Point any MCP client at `http://127.0.0.1:8000/mcp`.
+
 ---
 
 ## Development & Testing

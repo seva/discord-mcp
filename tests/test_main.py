@@ -54,6 +54,18 @@ def test_cli_serve_invokes_transport_run(tmp_path, monkeypatch):
     mock_run.assert_called_once_with(transport="stdio")
 
 
+def test_cli_serve_http_transport_builds_configured_instance():
+    with patch.object(
+        sys, "argv", ["discord_mcp", "serve", "--transport", "http", "--port", "9123"]
+    ):
+        with patch("discord_mcp.server.build_mcp") as mock_build:
+            instance = mock_build.return_value
+            result = main()
+    assert result == 0
+    mock_build.assert_called_once_with(port=9123)
+    instance.run.assert_called_once_with("streamable-http")
+
+
 def test_cli_requires_subcommand():
     with patch.object(sys, "argv", ["discord_mcp"]):
         with pytest.raises(SystemExit):

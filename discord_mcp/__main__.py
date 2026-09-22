@@ -35,7 +35,14 @@ def main() -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("auth", help="Interactive browser login; captures token into DPAPI")
     sub.add_parser("status", help="Verify connectivity and print authenticated user")
-    sub.add_parser("serve", help="Launch the FastMCP server over stdio")
+    serve = sub.add_parser("serve", help="Launch the FastMCP server")
+    serve.add_argument(
+        "--transport",
+        choices=["stdio", "http"],
+        default="stdio",
+        help="stdio (default) or streamable-HTTP on 127.0.0.1",
+    )
+    serve.add_argument("--port", type=int, default=8000, help="HTTP port (default 8000)")
 
     args = parser.parse_args()
 
@@ -44,7 +51,7 @@ def main() -> int:
     if args.command == "status":
         return _status()
     if args.command == "serve":
-        server.run()
+        server.run(transport=args.transport, port=args.port)
         return 0
     return 1
 

@@ -64,6 +64,89 @@ def test_tool_registration():
     assert "query" in props and props["query"].get("type") == "string"
 
 
+def test_build_mcp_factory_pins_tools_and_settings():
+    from discord_mcp.server import build_mcp
+
+    instance = build_mcp(port=9123)
+    tools = {t.name for t in instance._tool_manager.list_tools()}
+    assert tools == {
+        "discord_status",
+        "discord_channels",
+        "discord_dms",
+        "discord_messages",
+        "discord_search",
+        "discord_threads",
+    }
+    assert instance.settings.port == 9123
+    assert instance.settings.host == "127.0.0.1"
+
+
+def _free_port() -> int:
+    import socket
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
+def test_http_transport_end_to_end(tmp_path):
+    """Real streamable-HTTP round trip over a live subprocess (initialize + list_tools only — no Discord calls)."""
+    import time
+
+    import httpx as _httpx
+
+    os.environ["DISCORD_MCP_DIR"] = str(tmp_path)
+    try:
+        save({"token": "test-user-token"})
+    finally:
+        os.environ.pop("DISCORD_MCP_DIR")
+
+    port = _free_port()
+    proc = subprocess.Popen(
+        [sys.executable, "-m", "discord_mcp", "serve", "--transport", "http", "--port", str(port)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        # Poll until uvicorn accepts connections (any HTTP response proves it is up).
+        ready = False
+        for _ in range(60):
+            if proc.poll() is not None:
+                break
+            try:
+                _httpx.get(f"http://127.0.0.1:{port}/mcp", timeout=1)
+                ready = True
+                break
+            except _httpx.HTTPError:
+                time.sleep(0.5)
+        assert ready, (
+            f"HTTP server did not come up; stderr={proc.stderr.read() if proc.stderr else ''}"
+        )
+
+        from mcp.client.session import ClientSession
+        from mcp.client.streamable_http import streamablehttp_client
+
+        async def _call():
+            async with streamablehttp_client(f"http://127.0.0.1:{port}/mcp") as (read, write, _):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
+                    listed = await session.list_tools()
+                    return {t.name for t in listed.tools}
+
+        tools = anyio.run(_call)
+        assert tools == {
+            "discord_status",
+            "discord_channels",
+            "discord_dms",
+            "discord_messages",
+            "discord_search",
+            "discord_threads",
+        }
+    finally:
+        proc.kill()
+
+
 @respx.mock
 @pytest.mark.asyncio
 async def test_call_tool_round_trip(tmp_path, monkeypatch):
