@@ -5,6 +5,7 @@ from mcp.server.fastmcp import FastMCP
 from discord_mcp.auth import store
 from discord_mcp.auth.store import AuthRequired
 from discord_mcp.tools import channels as channels_tool
+from discord_mcp.tools import dms as dms_tool
 from discord_mcp.tools import messages as messages_tool
 from discord_mcp.tools import search as search_tool
 from discord_mcp.tools import status as status_tool
@@ -28,6 +29,12 @@ async def discord_channels(guild_id: str | None = None) -> str:
 async def discord_messages(channel_id: str, limit: int = 10) -> str:
     """Fetch recent messages from a channel (secret-scrubbed)."""
     return await messages_tool.discord_messages(channel_id, limit)
+
+
+@mcp.tool()
+async def discord_dms() -> str:
+    """List the user's DM and group-DM channels with derived labels."""
+    return await dms_tool.discord_dms()
 
 
 @mcp.tool()

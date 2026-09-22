@@ -36,6 +36,35 @@ async def test_get_current_user():
 
 @respx.mock
 @pytest.mark.asyncio
+async def test_get_dm_channels():
+    dms = [
+        {
+            "id": "552672738930851851",
+            "type": 1,
+            "flags": 0,
+            "recipient_flags": 0,
+            "recipients": [
+                {"id": "540654797414465581", "username": "mathslap", "global_name": "mathslap"}
+            ],
+        },
+        {
+            "id": "552672738930851852",
+            "type": 3,
+            "name": "the boys",
+            "flags": 0,
+            "recipient_flags": 0,
+            "recipients": [{"id": "1", "username": "a", "global_name": "A"}],
+        },
+    ]
+    respx.get(f"{BASE}/users/@me/channels").mock(return_value=httpx.Response(200, json=dms))
+    async with _make_client() as client:
+        result = await client.get_dm_channels()
+    assert result[0]["id"] == "552672738930851851"
+    assert result[1]["name"] == "the boys"
+
+
+@respx.mock
+@pytest.mark.asyncio
 async def test_get_guilds():
     respx.get(f"{BASE}/users/@me/guilds").mock(
         return_value=httpx.Response(

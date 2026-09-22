@@ -118,6 +118,46 @@ async def test_search_without_guild_id_raises(auth):
         await discord_search("key")
 
 
+DM_CHANNELS = [
+    {
+        "id": "552672738930851851",
+        "type": 1,
+        "flags": 0,
+        "recipient_flags": 0,
+        "recipients": [
+            {"id": "540654797414465581", "username": "mathslap", "global_name": "mathslap"}
+        ],
+    },
+    {
+        "id": "552672738930851852",
+        "type": 3,
+        "name": "the boys",
+        "flags": 0,
+        "recipient_flags": 0,
+        "recipients": [{"id": "1", "username": "a", "global_name": "A"}],
+    },
+]
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_dms_derives_labels_from_recipients(auth):
+    respx.get(f"{BASE}/users/@me/channels").mock(return_value=httpx.Response(200, json=DM_CHANNELS))
+
+    from discord_mcp.tools.dms import discord_dms
+
+    result = json.loads(await discord_dms())
+    # type-1 DM: label from recipients (no name field)
+    assert result[0]["id"] == "552672738930851851"
+    assert result[0]["label"] == "mathslap"
+    assert result[0]["type"] == 1
+    # type-3 group DM: label from name
+    assert result[1]["label"] == "the boys"
+    assert result[1]["type"] == 3
+    # channel ids are usable by discord_messages
+    assert all("id" in entry and "type" in entry and "label" in entry for entry in result)
+
+
 def test_scrub_messages_reaches_embed_free_text():
     from discord_mcp.tools import scrub_messages
 

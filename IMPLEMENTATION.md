@@ -38,7 +38,7 @@ WIP Limit = 1. Done means tests pass, invariants hold, and evidence is recorded.
 
 ## L2 Rung — Resilience & Depth (current)
 - [x] DM resolution discovery: live `GET /users/@me/channels` probe (commitment record: Activation = live 200 with parseable channel array — held; Continuation = shapes matching endpoints.md entry — recorded in §2.6; Exit = endpoint unusable for user tokens — did not fire). 27 channels observed (25 DM, 2 group DM); `discord_messages` verified reading a DM channel ID.
-- [ ] DM listing surface (tests-first): expose DM channels to MCP clients (tool or channels extension)
+- [x] DM listing surface (tests-first): expose DM channels to MCP clients (tool or channels extension) — implemented as new `discord_dms` tool (Owner-approved option A); client `get_dm_channels()`; labels derived from recipients (type-1) / name (type-3); live probe: 27 channels over MCP boundary, isError=False
 - [ ] TTL cache layer (tests-first): per-key TTL for `/users/@me/guilds`, `/guilds/{id}/channels`, `/channels/{id}/messages`
 - [ ] Thread traversal discovery: `GET /channels/{id}/threads/archived` live probe
 

@@ -47,7 +47,13 @@ def test_run_exits_when_auth_expired(tmp_path):
 def test_tool_registration():
     tools = {t.name: t for t in mcp._tool_manager.list_tools()}
 
-    expected = {"discord_status", "discord_channels", "discord_messages", "discord_search"}
+    expected = {
+        "discord_status",
+        "discord_channels",
+        "discord_messages",
+        "discord_search",
+        "discord_dms",
+    }
     assert expected == set(tools.keys())
 
     props = tools["discord_messages"].parameters.get("properties", {})

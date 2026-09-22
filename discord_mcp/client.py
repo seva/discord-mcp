@@ -87,6 +87,9 @@ class DiscordClient:
     async def get_guilds(self) -> list[dict]:
         return await self._request("GET", "/users/@me/guilds")  # type: ignore[return-value]
 
+    async def get_dm_channels(self) -> list[dict]:
+        return await self._request("GET", "/users/@me/channels")  # type: ignore[return-value]
+
     async def get_guild_channels(self, guild_id: str) -> list[dict]:
         return await self._request("GET", f"/guilds/{guild_id}/channels")  # type: ignore[return-value]
 
