@@ -1,6 +1,6 @@
 # discord-mcp
 
-FastMCP server exposing Discord context (guilds, channels, messages, search) to MCP clients via Playwright web authentication and Windows DPAPI credential protection.
+FastMCP server exposing Discord context (guilds, channels, DMs, threads, messages, search) to MCP clients via Playwright web authentication and Windows DPAPI credential protection.
 
 ## Overview
 
