@@ -36,6 +36,12 @@ WIP Limit = 1. Done means tests pass, invariants hold, and evidence is recorded.
 - [x] Execute 6-step Epistegrity Post-Phase Audit
 - [x] Commit WaLRuS session summary (`docs/walrus-YYYY-MM-DD.md`)
 
+## L2 Rung — Resilience & Depth (current)
+- [x] DM resolution discovery: live `GET /users/@me/channels` probe (commitment record: Activation = live 200 with parseable channel array — held; Continuation = shapes matching endpoints.md entry — recorded in §2.6; Exit = endpoint unusable for user tokens — did not fire). 27 channels observed (25 DM, 2 group DM); `discord_messages` verified reading a DM channel ID.
+- [ ] DM listing surface (tests-first): expose DM channels to MCP clients (tool or channels extension)
+- [ ] TTL cache layer (tests-first): per-key TTL for `/users/@me/guilds`, `/guilds/{id}/channels`, `/channels/{id}/messages`
+- [ ] Thread traversal discovery: `GET /channels/{id}/threads/archived` live probe
+
 ## Live Verification (L1 rung)
 - [x] Substrate: `pip install -e .` — package importable from any cwd
 - [x] Operator live auth: `python -m discord_mcp auth` → token captured, DPAPI-encrypted at `~/.discord-mcp/auth.dpapi`

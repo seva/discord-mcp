@@ -125,6 +125,13 @@ Accept: application/json
   }
   ```
 
+### 2.6 List DM Channels (`GET /users/@me/channels`) — verified live 2026-09-22
+- **Path:** `/users/@me/channels`
+- **Purpose:** Lists the user's private channels — direct messages and group DMs.
+- **Observed response:** Array of channel objects. Plain DMs (`type: 1`) carry no `name`; identity lives in `recipients` (array of user objects with `id`, `username`, `global_name`). Group DMs (`type: 3`) additionally carry `name`. Observed keys: `id`, `type`, `flags`, `recipient_flags`, `recipients`.
+- **Observed live:** 27 channels (25 type-1 DMs, 2 type-3 group DMs).
+- **DM message reading:** `GET /channels/{dm_id}/messages` works with the same user token for DM channel IDs — verified live (3 messages returned). The existing `discord_messages` tool therefore reads DMs given an ID; the missing surface is *listing* them.
+
 ---
 
 ## 3. Rate Limits & Error Handling
