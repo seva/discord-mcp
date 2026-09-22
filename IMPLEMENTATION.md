@@ -10,10 +10,10 @@ WIP Limit = 1. Done means tests pass, invariants hold, and evidence is recorded.
 - [x] Define maximal scope ladder and terminal bounds in `docs/scope.md`
 
 ## Phase 1: Authentication & DPAPI Storage
-- [ ] Tests for DPAPI storage (`tests/auth/test_store.py`)
-- [ ] Implement DPAPI store (`discord_mcp/auth/store.py`)
-- [ ] Tests for Playwright browser capture (`tests/auth/test_browser.py`)
-- [ ] Implement Playwright browser capture (`discord_mcp/auth/browser.py`)
+- [x] Tests for DPAPI storage (`tests/auth/test_store.py`)
+- [x] Implement DPAPI store (`discord_mcp/auth/store.py`)
+- [x] Tests for Playwright browser capture (`tests/auth/test_browser.py`)
+- [x] Implement Playwright browser capture (`discord_mcp/auth/browser.py`)
 
 ## Phase 2: Secret-Scrub Boundary & Discord Client
 - [ ] Tests for secret-scrub boundary (`tests/client/test_scrub.py`)
