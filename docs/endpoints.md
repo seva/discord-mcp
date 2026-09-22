@@ -103,6 +103,7 @@ Accept: application/json
   - `content`: String query term
   - `channel_id`: Snowflake ID (optional filter)
   - `author_id`: Snowflake ID (optional filter)
+- **Async behavior (verified live 2026-09-22):** The first call may return `202 Accepted` while results are computed; the response body has no `messages` key. Poll the same request until `200 OK` (observed ready within ~2s). The client implements this poll (`SEARCH_RETRY_INTERVAL = 2.0`, bounded by `MAX_RETRIES`).
 - **Response Schema:**
   Note: Discord message search returns an array of message arrays (where each inner array contains the matched message plus contextual neighboring messages).
   ```json

@@ -146,6 +146,35 @@ async def test_429_exhaustion_raises():
 
 @respx.mock
 @pytest.mark.asyncio
+async def test_search_202_polls_until_200():
+    route = respx.get(f"{BASE}/guilds/1551377931866079312/messages/search").mock(
+        side_effect=[
+            httpx.Response(202, json={}),
+            httpx.Response(
+                200,
+                json={"analytics_id": "a", "messages": [[{"id": "m1", "content": "found"}]]},
+            ),
+        ]
+    )
+    async with _make_client() as client:
+        result = await client.search_guild_messages("1551377931866079312", "the")
+    assert result[0]["content"] == "found"
+    assert route.call_count == 2
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_search_202_exhaustion_raises():
+    respx.get(f"{BASE}/guilds/1551377931866079312/messages/search").mock(
+        return_value=httpx.Response(202, json={})
+    )
+    with pytest.raises(RuntimeError):
+        async with _make_client() as client:
+            await client.search_guild_messages("1551377931866079312", "the")
+
+
+@respx.mock
+@pytest.mark.asyncio
 async def test_search_with_channel_id_sends_filter_param():
     route = respx.get(f"{BASE}/guilds/1551377931866079312/messages/search").mock(
         return_value=httpx.Response(200, json={"total_results": 0, "messages": []})

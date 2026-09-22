@@ -42,3 +42,4 @@ WIP Limit = 1. Done means tests pass, invariants hold, and evidence is recorded.
 - [x] `python -m discord_mcp status` → 200 OK, `swearlock`, 11 guilds
 - [x] Registered in `~/.config/opencode/opencode.json` (mcp/discord)
 - [x] Live MCP tool-call round trip: `discord_status` + `discord_channels` over FastMCP against real Discord API — PlayForKeeps (1551377931866079312) visible; live 429 absorbed by Retry-After backoff and retried to 200 OK
+- [x] Live `discord_search` probe: discovered async `202 Accepted` behavior, implemented 202-poll in client (tests-first), re-verified end-to-end — 9 scrubbed results returned over the MCP boundary

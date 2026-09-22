@@ -16,6 +16,8 @@ USER_AGENT = (
     "(KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
 )
 MAX_RETRIES = 3
+# Discord's search endpoint returns 202 while results are computed asynchronously.
+SEARCH_RETRY_INTERVAL = 2.0  # seconds
 
 
 class AuthRequired(Exception):
@@ -63,6 +65,10 @@ class DiscordClient:
                 retry_after = float(response.headers.get("Retry-After", 1))
                 await asyncio.sleep(retry_after)
                 continue
+            if response.status_code == 202:
+                # Search still computing; poll after a short interval.
+                await asyncio.sleep(SEARCH_RETRY_INTERVAL)
+                continue
             if response.status_code == 401:
                 raise AuthRequired("Token invalid or expired. Run: python -m discord_mcp auth")
             if response.status_code == 403:
@@ -71,7 +77,9 @@ class DiscordClient:
                 raise NotFound(f"Not found: {path}")
             response.raise_for_status()
             return response.json()
-        raise RuntimeError(f"Rate limited after {MAX_RETRIES} retries on {path}")
+        raise RuntimeError(
+            f"Rate limited or search incomplete after {MAX_RETRIES} retries on {path}"
+        )
 
     async def get_current_user(self) -> dict:
         return await self._request("GET", "/users/@me")  # type: ignore[return-value]
