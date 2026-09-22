@@ -22,10 +22,10 @@ WIP Limit = 1. Done means tests pass, invariants hold, and evidence is recorded.
 - [x] Implement Discord REST client (`discord_mcp/client.py`)
 
 ## Phase 3: FastMCP Tools & Server
-- [ ] Tests for MCP tools (`tests/tools/test_tools.py`)
-- [ ] Implement MCP tools (`discord_mcp/tools/`)
-- [ ] Tests for FastMCP stdio server (`tests/server/test_server.py`)
-- [ ] Implement FastMCP server (`discord_mcp/server.py`)
+- [x] Tests for MCP tools (`tests/tools/test_tools.py`)
+- [x] Implement MCP tools (`discord_mcp/tools/`)
+- [x] Tests for FastMCP stdio server (`tests/server/test_server.py`)
+- [x] Implement FastMCP server (`discord_mcp/server.py`)
 
 ## Phase 4: CLI Interface & Verification
 - [ ] Tests for CLI entrypoint (`tests/test_main.py`)
