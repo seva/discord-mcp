@@ -1,0 +1,30 @@
+# discord-mcp — Discord FastMCP Context Server
+
+FastMCP server exposing Discord context (guilds, channels, messages, search) to MCP clients via Playwright web authentication and Windows DPAPI credential protection.
+
+## Session Start
+
+1. Read `METHODOLOGY.md`
+2. Read `ARCHITECTURE.md` — verify component descriptions match current code before acting
+3. Scan `IMPLEMENTATION.md` checkboxes — first unchecked task is current state
+4. Check open GitHub issues / records for failures and decisions
+5. Search memory for relevant prior knowledge
+6. Locate the project in the operating cycle (`CYCLE.md`) — which step is current?
+7. Identify your role (`ROLES.md`; default Steward) and declared role instances — no role grades its own work
+
+## Conventions
+
+- **Scope position** (`docs/scope.md`): L1 (Local standalone FastMCP server over stdio under operator personal user identity, encrypted DPAPI token store, secret-scrub boundary, and core read tools).
+- **Compiled terminal-bound constraints** (`docs/scope.md`, Terminal bound):
+  - User session tokens never leave the local DPAPI store at `~/.discord-mcp/auth.dpapi`; plaintext tokens are never written to disk.
+  - Secret-scrub boundary (`discord_mcp/scrub.py`) filters all message content before returning across MCP tool boundaries, redacting private keys, GitHub tokens, API keys, bot tokens, URL credentials, and OTPs.
+  - Zero desktop application dependency: authentication runs through interactive Chromium via Playwright directly to `https://discord.com/login`.
+  - Read-only context operations under personal user account respecting Discord rate limits and platform constraints.
+- **Language/runtime**: Python ≥3.11 (`mcp>=1.0`, `playwright>=1.40`, `httpx>=0.27`, `pywin32>=306`).
+- **Test runner**: `python -m pytest` (`pytest-asyncio`, auto mode).
+- **Formatting/linting**: `ruff check` and `ruff format --check` must pass before commit.
+- **Role instances** (`ROLES.md`): Steward = the executing agent session on this repository. Critic = a distinct subagent/session spawned at step completion seeing claim and evidence without the Steward's reasoning. Auditor = separate instance verifying against constitution and success criterion. Owner = project owner (@swearlock).
+- **CLI Commands**:
+  - `python -m discord_mcp auth`: Interactive Playwright Chromium login, capturing user token into DPAPI.
+  - `python -m discord_mcp status`: Test connectivity and print authenticated user details.
+  - `python -m discord_mcp serve`: Launch FastMCP server over stdio.
