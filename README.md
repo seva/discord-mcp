@@ -20,9 +20,11 @@ FastMCP server exposing Discord context (guilds, channels, messages, search) to 
    - Returns the authenticated user profile (username, user ID) and count of accessible guilds.
 2. **`discord_channels`**
    - Lists accessible guilds and their channels (optionally filtered by `guild_id`).
-3. **`discord_messages`**
+3. **`discord_dms`**
+   - Lists the user's DM and group-DM channels with derived labels; returned channel IDs work with `discord_messages`.
+4. **`discord_messages`**
    - Retrieves recent messages from a specified channel or DM thread (with secret scrubbing applied).
-4. **`discord_search`**
+5. **`discord_search`**
    - Searches message content across a guild or channel with keyword filtering and secret scrubbing.
 
 ---
