@@ -33,5 +33,5 @@ WIP Limit = 1. Done means tests pass, invariants hold, and evidence is recorded.
 - [x] Verify test suite passes with coverage and ruff linting clean
 
 ## Phase 5: Post-Phase Audit & WaLRuS-DATA
-- [ ] Execute 6-step Epistegrity Post-Phase Audit
-- [ ] Commit WaLRuS session summary (`docs/walrus-YYYY-MM-DD.md`)
+- [x] Execute 6-step Epistegrity Post-Phase Audit
+- [x] Commit WaLRuS session summary (`docs/walrus-YYYY-MM-DD.md`)
