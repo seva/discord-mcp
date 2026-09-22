@@ -147,5 +147,6 @@ class DiscordClient:
         if channel_id:
             params["channel_id"] = channel_id
         data = await self._request("GET", f"/guilds/{guild_id}/messages/search", params=params)
-        # Discord search returns nested arrays (match + context). Flatten.
-        return [msg for block in data["messages"] for msg in block]  # type: ignore[index,return-value]
+        # Discord search returns nested arrays (match + context). Flatten; the
+        # endpoint has no server-side limit param, so `limit` truncates client-side.
+        return [msg for block in data["messages"] for msg in block][:limit]  # type: ignore[index,return-value]

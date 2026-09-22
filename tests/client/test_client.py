@@ -210,6 +210,24 @@ async def test_search_guild_messages_flattens_nested_results():
 
 @respx.mock
 @pytest.mark.asyncio
+async def test_search_limit_truncates_client_side():
+    nested = {
+        "total_results": 3,
+        "messages": [[{"id": f"m{i}", "content": f"msg {i}"} for i in range(3)]],
+    }
+    respx.get(f"{BASE}/guilds/1551377931866079312/messages/search").mock(
+        return_value=httpx.Response(200, json=nested)
+    )
+    async with _make_client() as client:
+        result = await client.search_guild_messages("1551377931866079312", "msg", limit=2)
+    assert len(result) == 2
+    assert result[0]["id"] == "m0"
+    url = str(respx.calls.last.request.url)
+    assert "limit" not in url  # endpoint has no server-side limit param
+
+
+@respx.mock
+@pytest.mark.asyncio
 async def test_401_raises_auth_required():
     respx.get(f"{BASE}/users/@me").mock(return_value=httpx.Response(401))
     with pytest.raises(AuthRequired):
