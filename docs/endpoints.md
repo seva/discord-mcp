@@ -142,11 +142,7 @@ Accept: application/json
 
 ## 3. Rate Limits & Error Handling
 
-- **Rate Limit Headers:**
-  - `X-RateLimit-Limit`: Maximum requests allowed in current window.
-  - `X-RateLimit-Remaining`: Remaining requests.
-  - `X-RateLimit-Reset-After`: Seconds until quota reset.
-  - `Retry-After`: Returned on HTTP 429 responses.
+- **Rate Limit Headers — CORRECTED live 2026-09-22:** User-account (non-bot) tokens receive **no `X-RateLimit-*` headers** on 200 responses — verified live across `/users/@me`, `/users/@me/guilds`, `/channels/{id}/messages`. The `X-RateLimit-*` header documentation in Discord's official docs applies to bot tokens. The **only** rate-limit signal available to this project is the `Retry-After` header on HTTP 429 (observed live — the backoff handler consumed it successfully). Proactive header-based budgeting is therefore structurally impossible for user tokens; the TTL cache is the primary request-volume defense, reactive backoff the fallback.
 - **Error Status Codes:**
   - `401 Unauthorized`: Token invalid, expired, or rejected. Triggers `AuthRequired`.
   - `403 Forbidden`: User lacks permission to read channel / guild.

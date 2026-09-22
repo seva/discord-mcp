@@ -25,7 +25,7 @@ Established 2026-09-22. Strategy artifact: the ladder this project climbs. Orien
 - **Cryptographic Credential Seclusion:** User authentication tokens remain exclusively protected by Windows DPAPI; memory extraction is bounded to runtime invocations.
 - **Secret-Scrub Boundary Defense:** High-precision regex pattern sanitization redacting private keys, tokens, OTPs, and URL credentials before exposing data to MCP clients.
 - **Personal Identity Emulation:** Operates through standard user HTTP REST v10 channels matching browser fingerprints, bypassing administrative bot invite requirements.
-- **Rate-Limit Resilience:** 429 `Retry-After` backoff (current, L1); proactive `X-RateLimit-*` header budgeting is the L2 rung.
+- **Rate-Limit Resilience:** 429 `Retry-After` backoff (current — the ONLY live signal: user tokens receive no `X-RateLimit-*` headers, verified live 2026-09-22, so header budgeting is structurally impossible); TTL caching (60s per-key) is the primary request-volume defense.
 
 ---
 

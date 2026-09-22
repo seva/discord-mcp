@@ -72,7 +72,8 @@ FastMCP server exposing Discord context to MCP clients via Playwright web authen
     - `get_guild_channels(guild_id: str) -> list[dict]`: `GET /guilds/{guild_id}/channels`
     - `get_channel_messages(channel_id: str, limit: int = 10) -> list[dict]`: `GET /channels/{channel_id}/messages?limit={limit}`
     - `search_guild_messages(guild_id: str, query: str, channel_id: str | None = None, limit: int = 10) -> list[dict]`: `GET /guilds/{guild_id}/messages/search?content={query}`
-  - Rate limit handling: On HTTP 429, reads `Retry-After` header and sleeps before retrying (max 3 retries). On HTTP 202 (search results still computing), polls at 2s intervals (max 3 retries). Proactive `X-RateLimit-*` budgeting is a later ladder rung, not current behavior.
+  - Rate limit handling: On HTTP 429, reads `Retry-After` header and sleeps before retrying (max 3 retries). On HTTP 202 (search results still computing), polls at 2s intervals (max 3 retries).
+  - **Budgeting note:** user tokens receive NO `X-RateLimit-*` headers on 200 responses (verified live across three endpoints, 2026-09-22 — the headers are bot-token-only in Discord's API). Proactive header budgeting is structurally impossible for this project's identity; the GET cache is the primary volume defense, reactive backoff the fallback.
   - **GET cache** (L2): per-process, per-key TTL cache in `DiscordClient` (`cache_ttl=60s` default, GET-only, max 256 entries with oldest-first eviction). Cache key = (method, path, sorted params). Only successful (200) responses are cached — 429/202/40x paths never store. TTL expiry only; no cross-TTL invalidation, no cross-process persistence. Declared staleness: up to 60s.
   - Error types: `AuthRequired` (401 — token invalid/expired, distinct from the store's `AuthRequired`), `AccessDenied` (403), `NotFound` (404), `RuntimeError` (rate-limit/search-incomplete retries exhausted).
 
