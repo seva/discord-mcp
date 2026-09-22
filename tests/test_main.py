@@ -1,10 +1,13 @@
-import json
 import sys
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
+import httpx
 import pytest
+import respx
 
 from discord_mcp.__main__ import main
+from discord_mcp.auth import store
+from discord_mcp.client import BASE_URL
 
 
 def test_cli_auth_captures_and_saves(tmp_path, monkeypatch):
@@ -17,37 +20,38 @@ def test_cli_auth_captures_and_saves(tmp_path, monkeypatch):
     assert (tmp_path / "auth.dpapi").exists()
 
 
-def test_cli_status_prints_user(capsys):
-    payload = {"id": "1", "username": "swearlock", "global_name": None, "guild_count": 2}
+@respx.mock
+def test_cli_status_prints_user(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("DISCORD_MCP_DIR", str(tmp_path))
+    store.save({"token": "test-user-token"})
+    respx.get(f"{BASE_URL}/users/@me").mock(
+        return_value=httpx.Response(200, json={"id": "1", "username": "swearlock"})
+    )
+    respx.get(f"{BASE_URL}/users/@me/guilds").mock(return_value=httpx.Response(200, json=[]))
+
     with patch.object(sys, "argv", ["discord_mcp", "status"]):
-        with patch(
-            "discord_mcp.tools.status.discord_status",
-            new=AsyncMock(return_value=json.dumps(payload)),
-        ):
-            result = main()
+        result = main()
     assert result == 0
     assert "swearlock" in capsys.readouterr().out
 
 
-def test_cli_status_exits_on_auth_required(capsys):
-    from discord_mcp.auth.store import AuthRequired
+def test_cli_status_exits_on_auth_required(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("DISCORD_MCP_DIR", str(tmp_path))
 
     with patch.object(sys, "argv", ["discord_mcp", "status"]):
-        with patch(
-            "discord_mcp.tools.status.discord_status",
-            new=AsyncMock(side_effect=AuthRequired("Auth required")),
-        ):
-            result = main()
+        result = main()
     assert result == 1
-    assert "Auth required" in capsys.readouterr().err
+    assert "No auth file found" in capsys.readouterr().err
 
 
-def test_cli_serve_invokes_server_run():
+def test_cli_serve_invokes_transport_run(tmp_path, monkeypatch):
+    monkeypatch.setenv("DISCORD_MCP_DIR", str(tmp_path))
+    store.save({"token": "test-user-token"})
     with patch.object(sys, "argv", ["discord_mcp", "serve"]):
-        with patch("discord_mcp.server.run", return_value=None) as mock_run:
+        with patch("discord_mcp.server.mcp.run", return_value=None) as mock_run:
             result = main()
     assert result == 0
-    mock_run.assert_called_once()
+    mock_run.assert_called_once_with(transport="stdio")
 
 
 def test_cli_requires_subcommand():

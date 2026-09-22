@@ -131,3 +131,30 @@ async def test_429_backs_off_then_succeeds():
         result = await client.get_channel_messages("123")
     assert result[0]["content"] == "after backoff"
     assert route.call_count == 2
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_429_exhaustion_raises():
+    respx.get(f"{BASE}/channels/123/messages").mock(
+        return_value=httpx.Response(429, headers={"Retry-After": "0"})
+    )
+    with pytest.raises(RuntimeError):
+        async with _make_client() as client:
+            await client.get_channel_messages("123")
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_search_with_channel_id_sends_filter_param():
+    route = respx.get(f"{BASE}/guilds/1551377931866079312/messages/search").mock(
+        return_value=httpx.Response(200, json={"total_results": 0, "messages": []})
+    )
+    async with _make_client() as client:
+        await client.search_guild_messages(
+            "1551377931866079312", "query", channel_id="1478480447431376966", limit=5
+        )
+    url = str(respx.calls.last.request.url)
+    assert "channel_id=1478480447431376966" in url
+    assert "content=query" in url
+    assert route.called

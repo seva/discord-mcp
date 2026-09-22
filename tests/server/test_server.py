@@ -1,15 +1,18 @@
+import json
 import os
 import subprocess
 import sys
-from unittest.mock import patch
 
 import anyio
+import httpx
 import pytest
+import respx
 from mcp.client.session import ClientSession
 from mcp.shared.message import SessionMessage
 from mcp.types import TextContent
 
 from discord_mcp.auth.store import save
+from discord_mcp.client import BASE_URL
 from discord_mcp.server import mcp
 
 
@@ -54,8 +57,18 @@ def test_tool_registration():
     assert "query" in props and props["query"].get("type") == "string"
 
 
+@respx.mock
 @pytest.mark.asyncio
-async def test_call_tool_round_trip():
+async def test_call_tool_round_trip(tmp_path, monkeypatch):
+    monkeypatch.setenv("DISCORD_MCP_DIR", str(tmp_path))
+    save({"token": "test-user-token"})
+    respx.get(f"{BASE_URL}/users/@me").mock(
+        return_value=httpx.Response(200, json={"id": "1", "username": "swearlock"})
+    )
+    respx.get(f"{BASE_URL}/users/@me/guilds").mock(
+        return_value=httpx.Response(200, json=[{"id": "2", "name": "PlayForKeeps"}])
+    )
+
     client_to_server_send, client_to_server_recv = anyio.create_memory_object_stream[
         SessionMessage | Exception
     ](16)
@@ -71,21 +84,25 @@ async def test_call_tool_round_trip():
             raise_exceptions=True,
         )
 
-    with patch("discord_mcp.tools.status.discord_status", return_value='{"ok": true}') as _:
-        async with anyio.create_task_group() as tg:
-            tg.start_soon(_run_server)
+    async with anyio.create_task_group() as tg:
+        tg.start_soon(_run_server)
 
-            async with ClientSession(
-                server_to_client_recv,
-                client_to_server_send,
-            ) as client:
-                await client.initialize()
+        async with ClientSession(
+            server_to_client_recv,
+            client_to_server_send,
+        ) as client:
+            await client.initialize()
 
-                result = await client.call_tool("discord_status", {})
+            result = await client.call_tool("discord_status", {})
 
-                tg.cancel_scope.cancel()
+            tg.cancel_scope.cancel()
 
     assert not result.isError
     assert len(result.content) == 1
     assert isinstance(result.content[0], TextContent)
-    assert result.content[0].text == '{"ok": true}'
+    assert json.loads(result.content[0].text) == {
+        "id": "1",
+        "username": "swearlock",
+        "global_name": None,
+        "guild_count": 1,
+    }

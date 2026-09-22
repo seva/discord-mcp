@@ -24,6 +24,7 @@ FastMCP server exposing Discord context (guilds, channels, messages, search) to 
 - **Test runner**: `python -m pytest` (`pytest-asyncio`, auto mode).
 - **Formatting/linting**: `ruff check` and `ruff format --check` must pass before commit.
 - **Role instances** (`ROLES.md`): Steward = the executing agent session on this repository. Critic = a distinct subagent/session spawned at step completion seeing claim and evidence without the Steward's reasoning. Auditor = separate instance verifying against constitution and success criterion. Owner = project owner (@swearlock).
+- **Declared deviation** (ARCHITECTURE.md banned pattern 2): the CLI serve-dispatch test patches the FastMCP stdio transport entry (`mcp.run`) — the process's external boundary — rather than launching a blocking transport in-process; no tool or client logic is mocked anywhere in the suite (tool/client tests run through respx at the HTTP layer and the real DPAPI store path).
 - **CLI Commands**:
   - `python -m discord_mcp auth`: Interactive Playwright Chromium login, capturing user token into DPAPI.
   - `python -m discord_mcp status`: Test connectivity and print authenticated user details.

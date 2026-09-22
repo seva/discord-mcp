@@ -71,7 +71,6 @@ class DiscordClient:
                 raise NotFound(f"Not found: {path}")
             response.raise_for_status()
             return response.json()
-        response.raise_for_status()
         raise RuntimeError(f"Rate limited after {MAX_RETRIES} retries on {path}")
 
     async def get_current_user(self) -> dict:
