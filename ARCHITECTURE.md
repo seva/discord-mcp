@@ -41,11 +41,10 @@ FastMCP server exposing Discord context to MCP clients via Playwright web authen
   - `_auth_path() -> Path`: Default `~/.discord-mcp/auth.dpapi`, overridable via `DISCORD_MCP_DIR`.
   - `save(data: dict) -> None`: Serializes token metadata to JSON, encrypts with `win32crypt.CryptProtectData`, writes binary ciphertext to disk.
   - `load() -> dict`: Reads binary ciphertext, decrypts with `win32crypt.CryptUnprotectData`, deserializes JSON. Raises `AuthRequired` on missing or corrupt file.
-  - `is_valid(data: dict) -> bool`: Verifies token string existence and expiration timestamps (if present).
+  - `is_expired(data: dict) -> bool`: True when the token string is missing/empty or an explicit `expired` flag is set.
 - **`discord_mcp.auth.browser`**:
   - `capture(timeout: int = 300) -> dict`: Launches interactive Chromium via `playwright.async_api.async_playwright()`.
-  - Intercepts requests to `https://discord.com/api/v*`, extracting the `Authorization` header.
-  - Polls `window.localStorage.getItem('token')` as fallback.
+  - Intercepts requests to `discord.com/api/`, extracting the `Authorization` header (Bot-prefixed tokens rejected).
   - Returns `{"token": token_str, "captured_at": timestamp}`.
 
 ### 2.2 Secret-Scrub Boundary (`discord_mcp.scrub`)
@@ -57,7 +56,8 @@ FastMCP server exposing Discord context to MCP clients via Playwright web authen
     - API keys (`sk-...`) (`[REDACTED:API_KEY]`)
     - Bot tokens (`\d{8,11}:[A-Za-z0-9_-]{35}`) (`[REDACTED:BOT_TOKEN]`)
     - URL secret parameters (`token=...`, `key=...`, `api_key=...`) (`[REDACTED:URL_SECRET]`)
-    - 6-to-8 digit OTPs (`[REDACTED:OTP]`)
+    - 6-to-8 digit OTPs preceded by OTP keywords (`[REDACTED:OTP]`)
+  - **`discord_mcp.tools.scrub_messages(messages) -> list[dict]`**: applies `scrub_text` to every free-text surface of each message — `content` plus embeds (`title`, `description`, `fields[].value`, `footer.text`, `author.name`).
 
 ### 2.3 Discord API Client (`discord_mcp.client`)
 - **`DiscordClient`**:
@@ -70,7 +70,7 @@ FastMCP server exposing Discord context to MCP clients via Playwright web authen
     - `get_guild_channels(guild_id: str) -> list[dict]`: `GET /guilds/{guild_id}/channels`
     - `get_channel_messages(channel_id: str, limit: int = 10) -> list[dict]`: `GET /channels/{channel_id}/messages?limit={limit}`
     - `search_guild_messages(guild_id: str, query: str, channel_id: str | None = None, limit: int = 10) -> list[dict]`: `GET /guilds/{guild_id}/messages/search?content={query}`
-  - Rate limit handling: Inspects `X-RateLimit-Remaining` and `X-RateLimit-Reset-After`, sleeping or backing off cleanly.
+  - Rate limit handling: On HTTP 429, reads `Retry-After` header and sleeps before retrying (max 3 retries). Proactive `X-RateLimit-*` budgeting is an L2 ladder rung, not current behavior.
 
 ### 2.4 FastMCP Server & Tools (`discord_mcp.server`, `discord_mcp.tools`)
 - Server exposes 4 tools:

@@ -54,6 +54,14 @@ def test_scrub_otp_code():
     assert len(redactions) == 1
 
 
+def test_scrub_otp_attached_colon_form():
+    text = "password: 95172243"
+    cleaned, redactions = scrub_text(text)
+    assert "95172243" not in cleaned
+    assert "[REDACTED:OTP]" in cleaned
+    assert redactions[0]["kind"] == "OTP"
+
+
 def test_spare_normal_numbers_and_dates():
     text = "Met on 2026-09-22 with 5 participants in room 402."
     cleaned, redactions = scrub_text(text)

@@ -35,7 +35,7 @@ _URL_SECRET_RE = re.compile(
 
 # OTP code patterns (6 to 8 digits preceded by OTP keywords, to avoid false positives on years/dates)
 _OTP_RE = re.compile(
-    r"(?i)\b(?:code|otp|verification|pin|password|token|2fa)(?:\s+(?:is|:|=))?\s+([0-9]{6,8})\b"
+    r"(?i)\b(?:code|otp|verification|pin|password|token|2fa)\s*(?:is|:|=)?\s*([0-9]{6,8})\b"
 )
 
 

@@ -94,3 +94,40 @@ async def test_search_scrubs_and_flattens():
             result = json.loads(await discord_search("key", guild_id="1551377931866079312"))
     assert "[REDACTED:API_KEY]" in result[0]["content"]
     cm.client.search_guild_messages.assert_awaited_once_with("1551377931866079312", "key", None, 10)
+
+
+def test_scrub_messages_reaches_embed_free_text():
+    from discord_mcp.tools import scrub_messages
+
+    message = {
+        "id": "m3",
+        "content": "",
+        "embeds": [
+            {
+                "title": "Deploy ghp_1234567890abcdefghijklmnopqrstuvwxyzAB",
+                "description": "Key: sk-ant-1234567890abcdef1234567890abcdef12345678",
+                "fields": [{"name": "note", "value": "password: 95172243"}],
+                "footer": {"text": "backup token 8597761224:AAFcvCF0ZV_Qh9xzWAgCKG21F3MTR8Iu2pg"},
+                "author": {"name": "poster"},
+            }
+        ],
+    }
+    result = scrub_messages([message])[0]
+    embed = result["embeds"][0]
+    assert "ghp_" not in embed["title"]
+    assert "[REDACTED:GITHUB_TOKEN]" in embed["title"]
+    assert "sk-ant-" not in embed["description"]
+    assert "95172243" not in embed["fields"][0]["value"]
+    assert "AAFcvCF0ZV" not in embed["footer"]["text"]
+
+
+def test_scrub_messages_preserves_embed_without_secrets():
+    from discord_mcp.tools import scrub_messages
+
+    message = {
+        "id": "m4",
+        "content": "see embed",
+        "embeds": [{"title": "Meeting notes", "description": "All clean here."}],
+    }
+    result = scrub_messages([message])[0]
+    assert result["embeds"][0]["description"] == "All clean here."
