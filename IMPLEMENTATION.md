@@ -16,10 +16,10 @@ WIP Limit = 1. Done means tests pass, invariants hold, and evidence is recorded.
 - [x] Implement Playwright browser capture (`discord_mcp/auth/browser.py`)
 
 ## Phase 2: Secret-Scrub Boundary & Discord Client
-- [ ] Tests for secret-scrub boundary (`tests/client/test_scrub.py`)
-- [ ] Implement secret-scrub filter (`discord_mcp/scrub.py`)
-- [ ] Tests for Discord REST client (`tests/client/test_client.py`)
-- [ ] Implement Discord REST client (`discord_mcp/client.py`)
+- [x] Tests for secret-scrub boundary (`tests/client/test_scrub.py`)
+- [x] Implement secret-scrub filter (`discord_mcp/scrub.py`)
+- [x] Tests for Discord REST client (`tests/client/test_client.py`)
+- [x] Implement Discord REST client (`discord_mcp/client.py`)
 
 ## Phase 3: FastMCP Tools & Server
 - [ ] Tests for MCP tools (`tests/tools/test_tools.py`)
