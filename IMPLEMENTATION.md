@@ -28,9 +28,9 @@ WIP Limit = 1. Done means tests pass, invariants hold, and evidence is recorded.
 - [x] Implement FastMCP server (`discord_mcp/server.py`)
 
 ## Phase 4: CLI Interface & Verification
-- [ ] Tests for CLI entrypoint (`tests/test_main.py`)
-- [ ] Implement CLI entrypoint (`discord_mcp/__main__.py`)
-- [ ] Verify test suite passes with coverage and ruff linting clean
+- [x] Tests for CLI entrypoint (`tests/test_main.py`)
+- [x] Implement CLI entrypoint (`discord_mcp/__main__.py`)
+- [x] Verify test suite passes with coverage and ruff linting clean
 
 ## Phase 5: Post-Phase Audit & WaLRuS-DATA
 - [ ] Execute 6-step Epistegrity Post-Phase Audit

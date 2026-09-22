@@ -13,7 +13,7 @@ from discord_mcp.auth.store import AuthRequired
 def _auth() -> int:
     from discord_mcp.auth.browser import capture
 
-    data = capture()
+    data = asyncio.run(capture())
     store.save(data)
     print("Auth captured and stored.")
     return 0
