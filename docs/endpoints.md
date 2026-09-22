@@ -132,6 +132,12 @@ Accept: application/json
 - **Observed live:** 27 channels (25 type-1 DMs, 2 type-3 group DMs).
 - **DM message reading:** `GET /channels/{dm_id}/messages` works with the same user token for DM channel IDs — verified live (3 messages returned). The existing `discord_messages` tool therefore reads DMs given an ID; the missing surface is *listing* them.
 
+### 2.7 Thread Endpoints (verified live 2026-09-22 — split result)
+- **`GET /guilds/{guild_id}/threads/active`** — **bot-only**: 403 with `code 20002` ("Only bots can use this endpoint") for user tokens. Active-thread listing is structurally unavailable to this project's user identity; the exit condition of the thread-discovery commitment fired for this surface.
+- **`GET /channels/{channel_id}/threads/archived/public`** — works for user tokens (200 OK). Envelope: `{"has_more": bool, "members": [...], "threads": [...]}`. Returns 403 `code 50001` (Missing Access) for channels the user cannot read — feeds the existing `AccessDenied` mapping.
+- **Observed thread object** (live sample, AutoGPT guild): `id`, `type` (10 observed — announcement thread; 11 public / 12 private per docs), `name`, `parent_id`, `guild_id`, `owner_id`, `member_count`, `message_count`, `total_message_sent`, `rate_limit_per_user`, `flags`, `thread_metadata` (`archived`, `archive_timestamp`, `auto_archive_duration`, `locked`, `create_timestamp`), `member_ids_preview`.
+- **Traversal without the bot-only endpoint**: thread IDs surface via archived lists and via search results (messages carry their thread's `channel_id`); `GET /channels/{thread_id}/messages` reads a thread by ID (same surface `discord_messages` already uses).
+
 ---
 
 ## 3. Rate Limits & Error Handling

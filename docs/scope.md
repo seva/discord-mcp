@@ -11,7 +11,7 @@ Established 2026-09-22. Strategy artifact: the ladder this project climbs. Orien
 | Level | Scope | Current system's contribution |
 |---|---|---|
 | L1 | Local standalone FastMCP server over stdio under operator personal user identity, encrypted DPAPI token store, secret-scrub boundary, and core read tools | as-is — complete and live-verified: `discord_status`, `discord_channels`, `discord_dms`, `discord_messages`, `discord_search` (5 tools) |
-| L2 | Multi-guild caching, proactive rate-limit budgeting, thread hierarchy traversal, DM and group DM resolution (DM resolution complete — pulled forward into L1 as `discord_dms`, 2026-09-22) | client architecture & schema; DM resolution built |
+| L2 | Multi-guild caching, proactive rate-limit budgeting, thread hierarchy traversal (verified live 2026-09-22: active-thread listing is bot-only — traversal = archived lists + ID-based reads), DM and group DM resolution (complete — pulled forward into L1 as `discord_dms`, 2026-09-22) | client architecture & schema; DM resolution built |
 | L3 | Cross-channel CCE integration (Ichnos consumer reading from standalone discord-mcp over stdio / HTTP) | MCP server protocol compliance |
 | L4 | Real-time event subscription, reaction analysis, and thread watcher hooks | webhook & event model |
 | L5 | Multi-platform unified comms context (Discord, Telegram, WhatsApp, Slack, Matrix) under uniform secret-scrub boundary | scrub boundary & adapter pattern |
