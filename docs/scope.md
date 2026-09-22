@@ -12,7 +12,7 @@ Established 2026-09-22. Strategy artifact: the ladder this project climbs. Orien
 |---|---|---|
 | L1 | Local standalone FastMCP server over stdio under operator personal user identity, encrypted DPAPI token store, secret-scrub boundary, and core read tools | as-is — complete and live-verified: `discord_status`, `discord_channels`, `discord_dms`, `discord_threads`, `discord_messages`, `discord_search` (6 tools) |
 | L2 | Multi-guild caching (built — 60s per-key GET cache), rate-limit budgeting (structurally impossible for user tokens — no `X-RateLimit-*` headers live, falsified 2026-09-22), thread hierarchy traversal (archived listing built — `discord_threads`; active-thread listing bot-only, structural), DM and group DM resolution (complete — pulled forward into L1 as `discord_dms`) | client architecture & schema; DM resolution + archived-thread listing built |
-| L3 | Cross-channel CCE integration (Ichnos consumer reading from standalone discord-mcp over stdio / HTTP) — consumer side lives in **Ichnos's cycle** (topology ruling 2026-09-22, Grok-verified: Ichnos = sole gateway/control plane, leaves stay standalone; home = Ichnos channel-matrix + seva/Ichnos#9) | MCP server protocol compliance + HTTP transport (built, live) |
+| L3 | Cross-channel integration — external MCP consumers read from this server over stdio / HTTP. Consumer-side work belongs to each consumer's own cycle; this server records no consumer identities (dependency direction: consumers depend on this server, never vice versa) | MCP server protocol compliance + HTTP transport (built, live) |
 | L4 | Real-time event subscription, reaction analysis, and thread watcher hooks | webhook & event model |
 | L5 | Multi-platform unified comms context (Discord, Telegram, WhatsApp, Slack, Matrix) under uniform secret-scrub boundary | scrub boundary & adapter pattern |
 | L6–L14 | Institutional context fabric, decentralized consensus verification, autonomous multi-agent operational telemetry | federation interface |
@@ -45,7 +45,7 @@ Established 2026-09-22. Strategy artifact: the ladder this project climbs. Orien
 | Secret-scrub boundary (`discord_mcp/scrub.py`) filters all message content before returning across MCP tool boundaries | Zero secret leakage to external models / contexts |
 | Zero desktop application dependency; authentication executed through interactive Chromium via Playwright | Host independence and resilience against client app locks |
 | Read-only context operations under personal user account | Account standing and abuse prevention |
-| `/mcp` (HTTP transport) stays localhost-bound until consumer auth exists — remote exposure is an operator decision made at the gateway (Ichnos), never a server default | Context served only to sanctioned consumers; the operator's full Discord context must not be reachable by unauthenticated surfaces |
+| `/mcp` (HTTP transport) stays localhost-bound until consumer auth exists; remote exposure requires consumer auth and is an operator decision — never a server default; this server's exposure policy has no dependency on any gateway or consumer | Context served only to sanctioned consumers; the operator's full Discord context must not be reachable by unauthenticated surfaces |
 
 | Commitment class | Refinement level (PRAROC-n, HORIZONS.md) | Terms below the cut, registered non-drifting |
 |---|---|---|
@@ -67,4 +67,4 @@ When the mission completes, manual copy-pasting of community discussions, operat
 - **Level 1 (Current):** Standalone FastMCP server running locally via stdio. Constrained by Windows DPAPI availability and manual Playwright login.
 - **Level 2–3:** Local caching and multi-client multiplexing. Constrained by Discord user API rate limits (typically 50 requests/sec with burst buckets).
 - **Level 4–5:** Real-time event gateway / websockets. Constrained by Discord Gateway connection policies for user accounts (self-bot detection heuristics; REST-only polling is safest).
-- **Nearest concrete anchors:** Discord REST API v10, OpenCode MCP configuration (`~/.config/opencode/opencode.json`), Ichnos CCE MCP client.
+- **Nearest concrete anchors:** Discord REST API v10, OpenCode MCP configuration (`~/.config/opencode/opencode.json`), generic MCP clients over stdio / streamable-HTTP.

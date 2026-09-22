@@ -19,7 +19,7 @@ USER_AGENT = (
 MAX_RETRIES = 3
 # Discord's search endpoint returns 202 while results are computed asynchronously.
 SEARCH_RETRY_INTERVAL = 2.0  # seconds
-# Per-process GET cache: 60s per Ichnos channel-matrix precedent.
+# Per-process GET cache: 60s default TTL.
 DEFAULT_CACHE_TTL = 60.0  # seconds
 CACHE_MAX_ENTRIES = 256
 
