@@ -48,6 +48,7 @@ WIP Limit = 1. Done means tests pass, invariants hold, and evidence is recorded.
 - [x] Thread traversal discovery: `GET /guilds/{id}/threads/active` + `GET /channels/{id}/threads/archived/public` live probes (commitment record: Activation — archived endpoint live 200, held; active-threads Exit FIRED — 403 code 20002, bot-only, structural platform constraint). Traversal for user tokens = archived lists + ID-based reads (search surfaces thread IDs). Shape recorded in endpoints.md §2.7.
 - [x] Thread listing surface (tests-first): expose archived-thread listing per channel to MCP clients — new `discord_threads(channel_id)` tool; client `get_archived_threads()` (public + private best-effort, AccessDenied degrades to public-only); Phase-Gate probe of private archived = 403 permission-gated (not bot-only); live probe: 2 archived threads over MCP boundary, isError=False
 - [x] Live probe `discord_threads` over the MCP boundary — isError=False, 2 archived threads (AutoGPT channel); private-archived 403 degraded to public-only as designed
+- [ ] Record-law doctrine enforcer (tests-first): machine enforcer for the dependency-direction doctrine (ADVISORY per WaLRuS 2026-09-22 Strategy — Lesson-Mechanism rule) — V3 P0.9 C2 → 1.35, top of queue (audit GAP-3, 2026-09-23)
 
 ## Live Verification (L1 rung)
 - [x] Substrate: `pip install -e .` — package importable from any cwd

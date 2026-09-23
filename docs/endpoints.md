@@ -25,14 +25,15 @@ Accept: application/json
 - **Response Schema:**
   ```json
   {
-    "id": "931228531340496946",
+    "id": "496752832058490901",
     "username": "swearlock",
     "discriminator": "0",
-    "global_name": "Seva Lapsha",
+    "global_name": "swearlock",
     "avatar": "a1b2c3d4...",
     "email": "user@example.com"
   }
   ```
+  (Example `id` corrected 2026-09-23 — prior value `931228531340496946` was the "66 Sir Raymond" guild id, not the user id; live-verified via `discord_status`. Audit GAP-2.)
 
 ### 2.2 Get User Guilds (`GET /users/@me/guilds`)
 - **Path:** `/users/@me/guilds`
@@ -86,9 +87,9 @@ Accept: application/json
       "id": "123456789012345678",
       "channel_id": "1478480447431376966",
       "author": {
-        "id": "931228531340496946",
+        "id": "496752832058490901",
         "username": "swearlock",
-        "global_name": "Seva Lapsha"
+        "global_name": "swearlock"
       },
       "content": "Meeting scheduled for 2pm.",
       "timestamp": "2026-09-22T14:00:00.000000+00:00",
@@ -116,7 +117,7 @@ Accept: application/json
           "id": "123456789012345678",
           "channel_id": "1478480447431376966",
           "author": {
-            "id": "931228531340496946",
+            "id": "496752832058490901",
             "username": "swearlock"
           },
           "content": "Secret key sk-proj-12345678901234567890123456789012"
