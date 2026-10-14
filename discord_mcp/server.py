@@ -21,27 +21,27 @@ def build_mcp(host: str = "127.0.0.1", port: int = 8000) -> FastMCP:
     instance = FastMCP("discord", host=host, port=port)
 
     @instance.tool()
-    async def discord_status() -> str:
+    async def discord_status():
         """Return the authenticated Discord user and count of accessible guilds."""
         return await status_tool.discord_status()
 
     @instance.tool()
-    async def discord_channels(guild_id: str | None = None) -> str:
+    async def discord_channels(guild_id: str | None = None):
         """List accessible guilds, or the channels of one guild when guild_id is given."""
         return await channels_tool.discord_channels(guild_id)
 
     @instance.tool()
-    async def discord_messages(channel_id: str, limit: int = 10) -> str:
+    async def discord_messages(channel_id: str, limit: int = 10):
         """Fetch recent messages from a channel (secret-scrubbed)."""
         return await messages_tool.discord_messages(channel_id, limit)
 
     @instance.tool()
-    async def discord_dms() -> str:
+    async def discord_dms():
         """List the user's DM and group-DM channels with derived labels."""
         return await dms_tool.discord_dms()
 
     @instance.tool()
-    async def discord_threads(channel_id: str) -> str:
+    async def discord_threads(channel_id: str):
         """List a channel's archived threads (public always, private best-effort). Thread IDs work with discord_messages."""
         return await threads_tool.discord_threads(channel_id)
 
@@ -51,7 +51,7 @@ def build_mcp(host: str = "127.0.0.1", port: int = 8000) -> FastMCP:
         guild_id: str | None = None,
         channel_id: str | None = None,
         limit: int = 10,
-    ) -> str:
+    ):
         """Search message content in a guild (secret-scrubbed). Requires guild_id."""
         return await search_tool.discord_search(query, guild_id, channel_id, limit)
 

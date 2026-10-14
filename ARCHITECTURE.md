@@ -84,7 +84,8 @@ FastMCP server exposing Discord context to MCP clients via Playwright web authen
   - `discord_dms()`: DM and group-DM channels with derived labels (recipients for type-1, `name` for type-3); channel IDs usable by `discord_messages`.
   - `discord_threads(channel_id: str)`: A channel's archived threads (public always, private best-effort); thread IDs usable by `discord_messages`. Active-thread listing is bot-only (endpoints.md 2.7).
   - `discord_messages(channel_id: str, limit: int = 10)`: Recent channel messages (scrubbed).
-  - `discord_search(query: str, guild_id: str | None = None, channel_id: str | None = None, limit: int = 10)`: Guild message search results (scrubbed).
+   - `discord_search(query: str, guild_id: str | None = None, channel_id: str | None = None, limit: int = 10)`: Guild message search results (scrubbed).
+- **No return annotations on wrappers (2026-10-14):** the `@instance.tool()` wrappers in `build_mcp()` intentionally carry no `-> str`. Annotating them breaks FastMCP registration under `mcp>=1.26` / pydantic 2.x (`PydanticUserError` in `create_model(result=str)`); the underlying `discord_mcp.tools.*` functions remain `-> str`. Enforcer: `tests/server/test_server.py:47,67` build the server for real.
 
 ### 2.5 CLI Interface (`discord_mcp.__main__`)
 - Commands:
